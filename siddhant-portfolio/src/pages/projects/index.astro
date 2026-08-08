@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const projects = (await getCollection('projects'))
+  .filter(p => !p.data.draft)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+---
+
+<BaseLayout title="Projects — Siddhant Pandey" description="A collection of end-to-end data engineering projects: Azure, Databricks, Spark, Delta Lake, CI/CD.">
+  <main class="flex-1 w-full max-w-6xl mx-auto px-6 py-12 md:py-20">
+    <header class="mb-12 text-center max-w-2xl mx-auto">
+      <h1 class="text-4xl md:text-5xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-4">Data Engineering Projects</h1>
+      <p class="text-slate-500 dark:text-slate-400 light:text-slate-600 text-lg">Real-world solutions for data ingestion, transformation, orchestration, and platform automation.</p>
+    </header>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {projects.map(project => (
+        <ProjectCard 
+          title={project.data.title}
+          description={project.data.description}
+          tags={project.data.tags}
+          metrics={project.data.metrics}
+          featured={project.data.featured}
+          slug={project.slug}
+          githubUrl={project.data.githubUrl}
+        />
+      ))}
+    </div>
+
+    {projects.length === 0 && (
+      <div class="text-center py-20 text-slate-500">No projects published yet. Check back soon!</div>
+    )}
+  </main>
+  <Footer />
+</BaseLayout>

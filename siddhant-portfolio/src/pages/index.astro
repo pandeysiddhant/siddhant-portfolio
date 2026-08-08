@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import TechBadges from '../components/TechBadges.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+// Fetch featured projects
+const allProjects = await getCollection('projects');
+const featuredProjects = allProjects
+  .filter(p => p.data.featured && !p.data.draft)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, 3); // Show top 3
+---
+
+<BaseLayout 
+  title="Siddhant Pandey — Azure Data Engineer" 
+  description="Building scalable data platforms on Azure & Databricks. Specializing in Spark optimization, Delta Lake, CI/CD automation, and Data Governance."
+>
+  <Hero 
+    name="Siddhant Pandey" 
+    title="Azure Data Engineer" 
+    location="Bengaluru, India" 
+    email="pandeysiddhant85@gmail.com" 
+    linkedin="https://www.linkedin.com/in/spandey1234" 
+    github="https://github.com/spandey1234"
+    phone="+91 8840115912"
+  />
+
+  <main class="flex-1 w-full max-w-6xl mx-auto px-6 py-12 md:py-20">
+    <!-- Featured Projects -->
+    <section id="projects" class="mb-20">
+      <header class="mb-10">
+        <h2 class="text-3xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-2">Featured Work</h2>
+        <p class="text-slate-500 dark:text-slate-400 light:text-slate-600">End-to-end data solutions: ingestion, transformation, orchestration, and governance.</p>
+      </header>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {featuredProjects.map(project => (
+          <ProjectCard 
+            title={project.data.title}
+            description={project.data.description}
+            tags={project.data.tags}
+            metrics={project.data.metrics}
+            featured={project.data.featured}
+            slug={project.slug}
+            githubUrl={project.data.githubUrl}
+          />
+        ))}
+      </div>
+      <div class="text-center mt-10">
+        <a href="/projects/" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-mono font-medium text-primary border border-primary rounded-lg hover:bg-primary/10 transition-colors">
+          View All Projects →
+        </a>
+      </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section id="stack" class="mb-20">
+      <header class="mb-10">
+        <h2 class="text-3xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-2">Tech Stack</h2>
+        <p class="text-slate-500 dark:text-slate-400 light:text-slate-600">Tools and platforms I use daily to deliver reliable data products.</p>
+      </header>
+      <TechBadges />
+    </section>
+
+    <!-- Certifications Teaser -->
+    <section id="certs" class="mb-20">
+       <header class="mb-10">
+        <h2 class="text-3xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-2">Certifications</h2>
+      </header>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <CertBadge name="Databricks Certified Data Engineer Associate" issuer="Databricks" color="#FF3621" />
+        <CertBadge name="Azure Data Engineer Associate (DP-203)" issuer="Microsoft" color="#0078D4" />
+        <CertBadge name="Azure Data Fundamentals (DP-900)" issuer="Microsoft" color="#0078D4" />
+        <CertBadge name="Azure Fundamentals (AZ-900)" issuer="Microsoft" color="#0078D4" />
+      </div>
+      <div class="text-center mt-6">
+        <a href="/certifications/" class="text-sm font-mono text-primary hover:underline">View All & Verify Credentials →</a>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<!-- Inline Micro Component for Certs -->
+<CertBadge interface Props { name: string; issuer: string; color: string; }>
+<div class="bg-dark-card dark:bg-dark-card light:bg-light-card border border-dark-border dark:border-dark-border light:border-light-border rounded-xl p-5 flex flex-col items-start justify-between h-full transition-colors hover:border-primary/50">
+  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style={`background: ${color}15; border: 1px solid ${color}40;`}>
+    <span class="text-2xl">📜</span>
+  </div>
+  <div>
+    <p class="font-semibold text-slate-100 dark:text-slate-100 light:text-slate-900 text-sm">{name}</p>
+    <p class="text-xs text-slate-500 mt-1">{issuer}</p>
+  </div>
+</div>
+</CertBadge>

@@ -1,0 +1,86 @@
+---
+title: "Programmatic ADF Management via REST API"
+description: "Eliminated manual UI deployments by building a Python automation framework on Databricks to manage Azure Data Factory resources via REST APIs."
+publishDate: "2023-10-15"
+updatedDate: "2024-01-20"
+tags: ["Python", "Azure Data Factory", "REST API", "Automation", "CI/CD", "Databricks", "MSAL", "Jenkins"]
+featured: true
+draft: false
+metrics:
+  - label: "Deployment Time"
+    before: "30 mins (Manual UI)"
+    after: "2 mins (Automated)"
+  - label: "Drift Detection"
+    value: "100% Git-tracked"
+  - label: "Manual Effort"
+    value: "40% Reduction"
+githubUrl: "https://github.com/spandey1234/adf-rest-automation" # UPDATE THIS
+architecture: |
+  graph TD
+    Dev[Developer] -->|Push JSON Definitions| Git[(Git Repo)]
+    Git -->|Webhook / PR Merge| Jenkins[Jenkins CI/CD]
+    Jenkins -->|Trigger Job| Notebook[Databricks Notebook Python]
+    Notebook -->|MSAL Client Credentials Flow| AAD[Azure AD / Entra ID]
+    AAD -->|Bearer Token| Notebook
+    Notebook -->|REST API (PUT/PATCH/POST)| ADF[(Azure Data Factory)]
+    ADF -->|Deploy/Update| Resources[Pipelines, Triggers, Datasets, Linked Services]
+    style Notebook fill:#FF3621,color:#fff,stroke:#333
+    style ADF fill:#0078D4,color:#fff,stroke:#333
+    style Git fill:#F05032,color:#fff,stroke:#333
+    style Jenkins fill:#D24939,color:#fff,stroke:#333
+---
+
+## Problem
+Manual deployment of Azure Data Factory (ADF) pipelines via the UI caused **configuration drift**, lacked **version control** for pipeline JSON definitions, and created a **bottleneck** during releases. Rollbacks were error-prone and auditing changes was impossible.
+
+## Solution Architecture
+I developed a **metadata-driven automation framework** running on **Azure Databricks** that treats ADF resources as code.
+
+### Key Components
+1.  **JSON Definitions**: All ADF artifacts (Pipelines, Datasets, Linked Services, Triggers) stored as parameterized JSON files in Git.
+2.  **Databricks Orchestrator**: A Python notebook triggered by Jenkins on PR merge.
+3.  **Authentication**: **MSAL (Microsoft Authentication Library)** using Service Principal (Client Credentials Flow) for secure, non-interactive token acquisition.
+4.  **Idempotent REST Client**: Handles `PUT` (Create/Update), `PATCH` (Partial Update), `GET` (Existence Check), `DELETE` (Cleanup). Implements **Exponential Backoff** for API throttling (429 errors).
+5.  **Dependency Resolution**: Topological sort of resources (Linked Services → Datasets → Pipelines → Triggers) to ensure deployment order.
+
+## Technical Highlights
+- **Parameterization**: Used `databricks.widgets` to inject environment-specific values (Key Vault names, Storage Accounts) into JSON payloads at runtime.
+- **Schema Validation**: Validated JSON payloads against ADF REST API schemas before submission to catch errors early.
+- **Drift Detection**: Scheduled job compares Live ADF state (via `GET` API) vs Git state; alerts on mismatch.
+- **CI/CD Integration**: Jenkins pipeline stage: `Lint JSON` → `Unit Test Python Client` → `Deploy to Dev` → `Manual Approval` → `Deploy to Prod`.
+
+## Results
+| Metric | Before | After |
+| :--- | :--- | :--- |
+| **Deployment Time** | ~30 mins (ClickOps) | **< 2 mins** (Automated) |
+| **Configuration Drift** | Frequent / Undetected | **Zero** (Git is Source of Truth) |
+| **Rollback Time** | Manual / Hours | **Git Revert + Pipeline Run** (< 5 mins) |
+| **Audit Trail** | None | **Full Git History + Jenkins Logs** |
+
+## Code Snippet: Auth & Deploy Loop
+```python
+from msal import ConfidentialClientApplication
+import requests
+import json
+
+# 1. Auth
+app = ConfidentialClientApplication(
+    client_id=client_id, 
+    authority=f"https://login.microsoftonline.com/{tenant_id}",
+    client_credential=client_secret
+)
+token = app.acquire_token_for_client(scopes=["https://management.azure.com/.default"])['access_token']
+headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+# 2. Deploy Pipeline (Idempotent PUT)
+def deploy_pipeline(resource_group, factory_name, pipeline_name, payload):
+    url = f"https://management.azure.com/subscriptions/{sub_id}/resourceGroups/{resource_group}/providers/Microsoft.DataFactory/factories/{factory_name}/pipelines/{pipeline_name}?api-version=2018-06-01"
+    resp = requests.put(url, headers=headers, json=payload)
+    resp.raise_for_status() # Handles 4xx/5xx
+    return resp.json()
+
+# 3. Orchestration Loop (Simplified)
+for resource in sorted_resources: # Topologically sorted
+    payload = render_template(resource.template, env_params)
+    deploy_pipeline(rg, factory, resource.name, payload)
+    log_deployment(resource.name, "SUCCESS")

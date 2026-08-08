@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Contact — Siddhant Pandey" description="Get in touch for Data Engineering opportunities, consulting, or collaboration.">
+  <main class="flex-1 w-full max-w-2xl mx-auto px-6 py-12 md:py-20 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-4">Let's Connect</h1>
+    <p class="text-lg text-slate-500 dark:text-slate-400 light:text-slate-600 mb-10">I'm currently open to Senior Data Engineer roles (Remote/Hybrid Bengaluru). Feel free to reach out.</p>
+
+    <div class="grid gap-4 md:grid-cols-3 text-left">
+      <a href="mailto:pandeysiddhant85@gmail.com" class="group bg-dark-card dark:bg-dark-card light:bg-light-card border border-dark-border dark:border-dark-border light:border-light-border rounded-xl p-6 hover:border-primary/50 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">✉️</div>
+        <h3 class="font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-1">Email</h3>
+        <p class="text-sm text-slate-500 font-mono">pandeysiddhant85@gmail.com</p>
+      </a>
+
+      <a href="https://www.linkedin.com/in/spandey1234" target="_blank" rel="noopener" class="group bg-dark-card dark:bg-dark-card light:bg-light-card border border-dark-border dark:border-dark-border light:border-light-border rounded-xl p-6 hover:border-primary/50 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">🔗</div>
+        <h3 class="font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-1">LinkedIn</h3>
+        <p class="text-sm text-slate-500 font-mono">/in/spandey1234</p>
+      </a>
+
+      <a href="https://github.com/spandey1234" target="_blank" rel="noopener" class="group bg-dark-card dark:bg-dark-card light:bg-light-card border border-dark-border dark:border-dark-border light:border-light-border rounded-xl p-6 hover:border-primary/50 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">🐙</div>
+        <h3 class="font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-1">GitHub</h3>
+        <p class="text-sm text-slate-500 font-mono">/spandey1234</p>
+      </a>
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-dark-border dark:border-dark-border light:border-light-border text-sm text-slate-500">
+      <p>📍 Based in Bengaluru, India | 🌏 Open to Relocation | ⏰ IST (UTC+5:30)</p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const certs = await getCollection('certs');
+certs.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout title="Certifications — Siddhant Pandey" description="Verified cloud and data engineering certifications from Microsoft and Databricks.">
+  <main class="flex-1 w-full max-w-4xl mx-auto px-6 py-12 md:py-20">
+    <header class="mb-12 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-4">Certifications</h1>
+      <p class="text-slate-500 dark:text-slate-400 light:text-slate-600 text-lg">Validated expertise in Azure Data Engineering, Databricks, and Cloud Fundamentals.</p>
+    </header>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      {certs.map(cert => (
+        <article class="bg-dark-card dark:bg-dark-card light:bg-light-card border border-dark-border dark:border-dark-border light:border-light-border rounded-2xl p-6 flex gap-5 hover:border-primary/50 transition-colors">
+          <div class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0" style={`background: ${cert.data.color}15; border: 1px solid ${cert.data.color}40;`}>
+            <span class="text-3xl">📜</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-bold text-slate-100 dark:text-slate-100 light:text-slate-900">{cert.data.name}</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 light:text-slate-500 mt-1">{cert.data.issuer}</p>
+            <p class="text-xs text-slate-500 mt-2 font-mono">Issued: {cert.data.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+            {cert.data.credentialId && <p class="text-xs text-slate-600 mt-1 font-mono">ID: {cert.data.credentialId}</p>}
+            {cert.data.verifyUrl && (
+              <a href={cert.data.verifyUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs font-mono text-primary mt-3 hover:underline">
+                Verify Credential →
+              </a>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #0D1117; }
+  ::-webkit-scrollbar-thumb { background: #30363D; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #484F58; }
+  
+  /* Selection */
+  ::selection { background: #0078D466; color: white; }
+  
+  /* Focus Visible for Accessibility */
+  :focus-visible {
+    outline: 2px solid #0078D4;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Prose Overrides for Dark Mode (Markdown Content) */
+  .prose-custom code::before { content: ""; }
+  .prose-custom code::after { content: ""; }
+}

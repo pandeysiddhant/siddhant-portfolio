@@ -1,0 +1,54 @@
+---
+// Usage: <Mermaid code={frontmatter.architecture} />
+interface Props {
+  code: string;
+  id?: string;
+}
+const { code, id = `mermaid-${Math.random().toString(36).substr(2, 9)}` } = Astro.props;
+---
+<div class="mermaid-container my-6 overflow-x-auto bg-dark-card dark:bg-dark-card light:bg-light-card rounded-lg border border-dark-border dark:border-dark-border light:border-light-border p-4">
+  <pre class="mermaid" id={id}>{code}</pre>
+</div>
+
+<script>
+  // Dynamic import mermaid only on client
+  import mermaid from 'mermaid';
+  
+  mermaid.initialize({ 
+    startOnLoad: false, 
+    theme: 'dark', // 'dark' | 'base' | 'forest'
+    themeVariables: {
+      primaryColor: '#0078D4',
+      edgeLabelBackground: '#161B22',
+      nodeBorder: '#30363D',
+      mainBkg: '#0D1117',
+      secondaryColor: '#FF3621',
+      tertiaryColor: '#1F6FEB'
+    }
+  });
+
+  // Render specifically this element
+  const element = document.getElementById(id);
+  if (element) {
+    try {
+      await mermaid.run({ nodes: [element] });
+    } catch (e) {
+      console.error('Mermaid render error:', e);
+      element.innerHTML = `<code class="text-red-400 p-2 block">Mermaid Syntax Error: ${e.message}</code>`;
+    }
+  }
+</script>
+
+<style>
+  /* Mermaid SVG responsive fix */
+  .mermaid-container svg { max-width: 100%; height: auto; }
+  /* Light mode override */
+  html:not(.dark) .mermaid-container { background-color: #F6F8FA; border-color: #D0D7DE; }
+  html:not(.dark) .mermaid-container .node rect, 
+  html:not(.dark) .mermaid-container .node circle,
+  html:not(.dark) .mermaid-container .node ellipse,
+  html:not(.dark) .mermaid-container .node polygon,
+  html:not(.dark) .mermaid-container .node path { fill: #FFFFFF !important; stroke: #0078D4 !important; }
+  html:not(.dark) .mermaid-container .edgePath .path { stroke: #586069 !important; }
+  html:not(.dark) .mermaid-container .label { fill: #24292E !important; }
+</style>

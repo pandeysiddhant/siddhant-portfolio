@@ -1,0 +1,79 @@
+
+### `src/content/projects/dlt-optimization.mdx`
+```mdx
+---
+title: "Delta Live Tables Migration & Spark Optimization"
+description: "Migrated legacy batch pipelines to Delta Live Tables (DLT) with declarative data quality expectations, reducing processing time by 35% and compute costs by 25%."
+publishDate: "2024-02-10"
+tags: ["Delta Live Tables", "PySpark", "Databricks", "Unity Catalog", "Data Quality", "Cost Optimization", "Medallion Architecture"]
+featured: true
+draft: false
+metrics:
+  - label: "Processing Time"
+    before: "4.2 hrs"
+    after: "2.7 hrs"
+    value: "35% Faster"
+  - label: "Compute Cost (DBU)"
+    value: "25% Reduction"
+  - label: "Data Quality Checks"
+    value: "15+ Expectations"
+githubUrl: "https://github.com/spandey1234/dlt-optimization-showcase" # UPDATE THIS
+architecture: |
+  graph LR
+    Raw[(ADLS Gen2 Raw Zone)] -->|Auto Loader<br/>cloudFiles| Bronze[Bronze DLT Table\n@expect valid_schema]
+    Bronze -->|DLT Apply Changes\nSCD Type 1| Silver[Silver DLT Table\n@expect_or_drop pk_not_null\n@expect_or_quarantine valid_range]
+    Silver -->|DLT Materialized View| Gold[Gold DLT Table\nAggregated/Business Ready]
+    Gold -->|Unity Catalog| BI[(Power BI / SQL Endpoint)]
+    style Bronze fill:#FF3621,color:#fff
+    style Silver fill:#FF3621,color:#fff
+    style Gold fill:#FF3621,color:#fff
+    style Raw fill:#0078D4,color:#fff
+    style BI fill:#0078D4,color:#fff
+---
+
+## Context
+Legacy notebooks used imperative `spark.read` / `write` patterns with manual watermark tracking. Schema changes broke downstream jobs silently. No automated data quality gates existed.
+
+## Migration Strategy
+### 1. Declarative Pipeline (DLT Python API)
+Replaced 500+ lines of orchestration code with **~80 lines of DLT decorators**.
+```python
+import dlt
+from pyspark.sql.functions import *
+
+# Bronze: Incremental Ingestion with Schema Evolution
+@dlt.table(
+    comment="Raw incremental landing zone",
+    table_properties={"quality": "bronze", "pipelines.autoOptimize.managed": "true"}
+)
+@dlt.expect("valid_schema", "schema_is_valid(_metadata)") # Custom UDF or simple checks
+def bronze_events():
+    return (spark.readStream
+        .format("cloudFiles")
+        .option("cloudFiles.format", "parquet")
+        .option("cloudFiles.schemaLocation", "/mnt/schema/bronze_events")
+        .load("/mnt/raw/events")
+    )
+
+# Silver: Cleaned, Conformed, SCD Type 1
+@dlt.table(
+    comment="Cleaned and deduplicated events",
+    table_properties={"quality": "silver"}
+)
+@dlt.expect_or_drop("valid_pk", "event_id IS NOT NULL")
+@dlt.expect_or_quarantine("valid_timestamp", "event_ts > '2020-01-01'")
+@dlt.expect("business_rule", "revenue >= 0")
+def silver_events():
+    return dlt.apply_changes(
+        target = "silver_events",
+        source = "bronze_events",
+        keys = ["event_id"],
+        sequence_by = col("event_ts"),
+        apply_as_deletes = expr("is_deleted = true"),
+        stored_as_scd_type = 1
+    )
+
+# Gold: Business Aggregates
+@dlt.view(comment="Daily Revenue KPI")
+def gold_daily_revenue():
+    return dlt.read("silver_events").groupBy("date", "region").agg(sum("revenue").alias("total_revenue"))

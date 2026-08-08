@@ -1,0 +1,71 @@
+
+### `src/content/projects/weather-streaming.mdx`
+```mdx
+---
+title: "Real-time Weather Data Streaming Pipeline"
+description: "Built an end-to-end streaming solution ingesting OpenWeather API data into Delta Lake using Structured Streaming on Databricks."
+publishDate: "2023-06-01"
+tags: ["Structured Streaming", "PySpark", "REST API", "Delta Lake", "Databricks", "Event Hubs", "Autoloader"]
+featured: false
+draft: false
+metrics:
+  - label: "Latency"
+    value: "Near Real-time (< 5 min)"
+  - label: "Cities Tracked"
+    value: "50+"
+  - label: "API Reliability"
+    value: "Retry + Dead Letter Queue"
+githubUrl: "https://github.com/spandey1234/weather-streaming-pipeline" # UPDATE THIS
+architecture: |
+  graph TD
+    Scheduler[ADF / Jobs Scheduler\nEvery 5 mins] -->|Trigger| Notebook[Databricks Notebook]
+    Notebook -->|Parallel Async Requests| API[OpenWeather API]
+    API -->|JSON Response| Notebook
+    Notebook -->|ForeachBatch Writer| Bronze[(Bronze Delta Table\nRaw JSON + Metadata)]
+    Bronze -->|Structured Streaming\nReadChangeFeed| Silver[(Silver Delta Table\nFlattened + Cleaned)]
+    Silver -->|Streaming Aggregation| Gold[(Gold Delta Table\nCity/Window Metrics)]
+    Gold -->|Unity Catalog| Dashboard[Grafana / Power BI]
+    style Notebook fill:#FF3621,color:#fff
+    style Bronze fill:#FF3621,color:#fff
+    style Silver fill:#FF3621,color:#fff
+    style Gold fill:#FF3621,color:#fff
+---
+
+## Challenge
+Ingest external API data reliably at scale. Handle: **Rate Limits (60 calls/min)**, **Network Failures**, **Schema Drift**, and **Exactly-Once Semantics**.
+
+## Implementation
+### 1. Resilient API Ingestion (Driver Side)
+Used Python `aiohttp` / `concurrent.futures` within the notebook to parallelize 50+ city requests.
+- **Token Bucket Algorithm** for client-side rate limiting.
+- **Exponential Backoff + Jitter** for 429/5xx errors.
+- **Dead Letter Queue (DLQ)**: Failed city payloads written to separate Delta table for replay.
+
+### 2. Structured Streaming (Bronze → Silver)
+```python
+# Bronze: Append raw JSON + Ingestion Metadata
+bronze_df = spark.createDataFrame(api_results, schema=bronze_schema) \
+    .withColumn("ingestion_ts", current_timestamp()) \
+    .withColumn("source_file", input_file_name()) # Not applicable for memory, but good practice
+
+bronze_df.write.format("delta").mode("append").save(bronze_path)
+
+# Silver: Streaming ETL with Watermark & Deduplication
+silver_stream = (spark.readStream
+    .format("delta")
+    .option("readChangeFeed", "true") # Capture CDC from Bronze if updates occur
+    .load(bronze_path)
+    .withWatermark("ingestion_ts", "1 hour") # Late arrival handling
+    .dropDuplicates(["city_id", "ingestion_ts"]) # Idempotency
+    .select(from_json(col("raw_json"), weather_schema).alias("data"), "ingestion_ts")
+    .select("data.*", "ingestion_ts")
+)
+
+# Write to Silver with Checkpointing
+(silver_stream.writeStream
+    .format("delta")
+    .option("checkpointLocation", silver_checkpoint)
+    .outputMode("append")
+    .trigger(processingTime="5 minutes")
+    .start(silver_path)
+)

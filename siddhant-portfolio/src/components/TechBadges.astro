@@ -1,0 +1,26 @@
+---
+import { skillCategories } from '../utils/skills';
+interface Props {
+  filter?: string[]; // Optional: only show specific skills
+}
+const { filter } = Astro.props;
+---
+<div class="space-y-6">
+  {skillCategories.map(({ category, skills }) => (
+    <div class="skill-group">
+      <h4 class="text-xs font-semibold uppercase tracking-wider text-primary-dark dark:text-primary-light mb-2 flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+        {category}
+      </h4>
+      <div class="flex flex-wrap gap-2">
+        {skills
+          .filter(s => !filter || filter.includes(s.name))
+          .map(({ name }) => (
+            <span class="px-3 py-1 text-sm font-mono rounded-full border border-dark-border dark:border-dark-border light:border-light-border bg-dark-card dark:bg-dark-card light:bg-light-card text-slate-300 dark:text-slate-200 hover:border-primary hover:bg-primary/10 transition-colors cursor-default">
+              {name}
+            </span>
+          ))}
+      </div>
+    </div>
+  ))}
+</div>

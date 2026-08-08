@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Footer from '../../../components/Footer.astro';
+import Mermaid from '../../../components/Mermaid.astro';
+import { getCollection, getEntryBySlug, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const projects = await getCollection('projects');
+  return projects
+    .filter(p => !p.data.draft)
+    .map(project => ({
+      params: { slug: project.slug },
+      props: { project },
+    }));
+};
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { title, description, publishDate, updatedDate, tags, metrics, githubUrl, liveUrl, architecture } = project.data;
+---
+
+<BaseLayout 
+  title={`${title} — Siddhant Pandey`} 
+  description={description}
+  canonicalURL={`/projects/${project.slug}/`}
+>
+  <article class="flex-1 w-full max-w-4xl mx-auto px-6 py-12 md:py-20 prose prose-dark dark:prose-invert max-w-none">
+    <!-- Header -->
+    <header class="mb-10 pb-6 border-b border-dark-border dark:border-dark-border light:border-light-border">
+      <div class="flex flex-wrap gap-2 mb-4">
+        {tags.map(tag => (
+          <span key={tag} class="px-3 py-1 text-xs font-mono rounded-full border border-dark-border dark:border-dark-border light:border-light-border bg-dark-card dark:bg-dark-card light:bg-light-card text-slate-400">{tag}</span>
+        ))}
+      </div>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-4">{title}</h1>
+      <p class="text-lg text-slate-400 dark:text-slate-400 light:text-slate-600 mb-6">{description}</p>
+      <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 font-mono">
+        <time datetime={publishDate.toISOString()}>{publishDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</time>
+        {updatedDate && <><span>•</span> Updated: {updatedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</>}
+        {githubUrl && (
+          <a href={githubUrl} target="_blank" rel="noopener" class="flex items-center gap-1 hover:text-primary transition-colors">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            View Code
+          </a>
+        )}
+        {liveUrl && (
+          <a href={liveUrl} target="_blank" rel="noopener" class="flex items-center gap-1 hover:text-primary transition-colors">🔗 Live Demo</a>
+        )}
+      </div>
+    </header>
+
+    <!-- Metrics Summary -->
+    {metrics && metrics.length > 0 && (
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-8 p-4 bg-dark-card/50 dark:bg-dark-card/50 light:bg-light-card/50 rounded-xl border border-dark-border/50">
+        {metrics.map((m, i) => (
+          <div key={i} class="text-center">
+            <p class="text-2xl md:text-3xl font-bold font-mono text-accent">{m.value || m.after || 'Done'}</p>
+            <p class="text-xs text-slate-500 uppercase tracking-wider">{m.label}</p>
+            {m.before && <p class="text-[10px] text-slate-600 line-through">Was: {m.before}</p>}
+          </div>
+        ))}
+      </div>
+    )}
+
+    <!-- Architecture Diagram -->
+    {architecture && (
+      <section class="my-10">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><span class="w-1 h-6 bg-primary rounded"></span> Architecture</h2>
+        <Mermaid code={architecture} />
+      </section>
+    )}
+
+    <!-- Main Content (MDX Body) -->
+    <div class="prose-custom">
+      <Content />
+    </div>
+
+    <!-- Back Link -->
+    <nav class="mt-12 pt-8 border-t border-dark-border dark:border-dark-border light:border-light-border">
+      <a href="/projects/" class="inline-flex items-center gap-2 text-sm font-mono text-primary hover:underline">← Back to All Projects</a>
+    </nav>
+  </article>
+  <Footer />
+</BaseLayout>
+
+<style is:global>
+  /* Prose customizations for dark mode readability */
+  .prose-custom h2 { @apply text-2xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mt-10 mb-4 pb-2 border-b border-dark-border/50; }
+  .prose-custom h3 { @apply text-xl font-semibold text-slate-200 dark:text-slate-200 light:text-slate-800 mt-8 mb-3; }
+  .prose-custom p { @apply text-slate-300 dark:text-slate-300 light:text-slate-700 leading-relaxed my-4; }
+  .prose-custom ul { @apply list-disc list-inside space-y-2 text-slate-300 dark:text-slate-300 light:text-slate-700 my-4 pl-4; }
+  .prose-custom ol { @apply list-decimal list-inside space-y-2 text-slate-300 dark:text-slate-300 light:text-slate-700 my-4 pl-4; }
+  .prose-custom code { @apply bg-dark-bg dark:bg-dark-bg light:bg-light-bg px-1.5 py-0.5 rounded font-mono text-accent dark:text-accent light:text-accent border border-dark-border/50; }
+  .prose-custom pre { @apply bg-dark-bg dark:bg-dark-bg light:bg-light-bg border border-dark-border rounded-xl p-4 overflow-x-auto my-6; }
+  .prose-custom pre code { @apply bg-transparent p-0 text-slate-200 dark:text-slate-200 light:text-slate-800 border-0; }
+  .prose-custom a { @apply text-primary underline underline-offset-2 hover:text-accent; }
+  .prose-custom blockquote { @apply border-l-4 border-primary pl-4 italic text-slate-400 my-4; }
+  .prose-custom strong { @apply text-slate-100 dark:text-slate-100 light:text-slate-900; }
+  .prose-custom table { @apply w-full border-collapse my-6; }
+  .prose-custom th, .prose-custom td { @apply border border-dark-border p-3 text-left text-sm; }
+  .prose-custom th { @apply bg-dark-card font-semibold; }
+</style>
