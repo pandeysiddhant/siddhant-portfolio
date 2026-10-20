@@ -1,0 +1,18 @@
+---
+interface Props {
+  name: string;
+  issuer: string;
+  color: string;
+}
+
+const { name, issuer, color } = Astro.props;
+---
+<article class="bg-dark-card dark:bg-dark-card light:bg-light-card border border-dark-border dark:border-dark-border light:border-light-border rounded-lg p-5 flex flex-col items-start justify-between h-full transition-colors hover:border-primary/50">
+  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style={`background: ${color}15; border: 1px solid ${color}40;`} aria-hidden="true">
+    <span class="text-2xl">📜</span>
+  </div>
+  <div class="mt-5">
+    <p class="font-semibold text-slate-100 dark:text-slate-100 light:text-slate-900 text-sm">{name}</p>
+    <p class="text-xs text-slate-500 mt-1">{issuer}</p>
+  </div>
+</article>

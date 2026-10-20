@@ -4,7 +4,7 @@ interface Props {
   code: string;
   id?: string;
 }
-const { code, id = `mermaid-${Math.random().toString(36).substr(2, 9)}` } = Astro.props;
+const { code, id = `mermaid-${Math.random().toString(36).slice(2, 11)}` } = Astro.props;
 ---
 <div class="mermaid-container my-6 overflow-x-auto bg-dark-card dark:bg-dark-card light:bg-light-card rounded-lg border border-dark-border dark:border-dark-border light:border-light-border p-4">
   <pre class="mermaid" id={id}>{code}</pre>
@@ -27,14 +27,12 @@ const { code, id = `mermaid-${Math.random().toString(36).substr(2, 9)}` } = Astr
     }
   });
 
-  // Render specifically this element
-  const element = document.getElementById(id);
-  if (element) {
+  for (const element of document.querySelectorAll<HTMLElement>('.mermaid')) {
     try {
       await mermaid.run({ nodes: [element] });
     } catch (e) {
       console.error('Mermaid render error:', e);
-      element.innerHTML = `<code class="text-red-400 p-2 block">Mermaid Syntax Error: ${e.message}</code>`;
+      element.textContent = 'Unable to render this architecture diagram.';
     }
   }
 </script>

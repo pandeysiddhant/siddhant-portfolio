@@ -8,17 +8,19 @@ interface Props {
   github: string;
   phone?: string;
 }
+import Metric from './Metric.astro';
+import { sitePath } from '../utils/sitePath';
 const { name, title, location, email, linkedin, github, phone } = Astro.props;
 ---
 <header class="relative min-h-[90vh] flex flex-col justify-center items-center px-6 pt-20 pb-12 text-center bg-gradient-to-b from-dark-bg via-dark-bg to-dark-card dark:from-dark-bg dark:via-dark-bg dark:to-dark-card light:from-light-bg light:via-light-bg light:to-light-card border-b border-dark-border dark:border-dark-border light:border-light-border">
   <!-- Background Pattern -->
-  <div class="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%230078D4" fill-opacity="0.4"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+  <div class="hero-pattern absolute inset-0 opacity-5"></div>
 
   <div class="relative z-10 max-w-4xl w-full space-y-6">
     <!-- Badge -->
     <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-mono">
       <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span></span>
-      Open to Senior Data Engineer Roles | Bengaluru, India
+      Data Engineer | {location}
     </span>
 
     <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-50 dark:text-slate-50 light:text-slate-900 leading-tight">
@@ -28,16 +30,15 @@ const { name, title, location, email, linkedin, github, phone } = Astro.props;
     </h1>
 
     <p class="text-lg md:text-xl text-slate-300 dark:text-slate-300 light:text-slate-600 max-w-2xl mx-auto">
-      Building scalable, cost-optimized data platforms on <span class="font-mono text-primary">Azure</span> & <span class="font-mono text-accent">Databricks</span>. 
-      Automating infrastructure, optimizing Spark, and enforcing governance.
+      Building scalable data solutions with <span class="font-mono text-primary">Azure</span>, <span class="font-mono text-accent">Databricks</span>, and Apache Spark. Experienced in Python, Scala, SQL, CI/CD, and using generative AI to streamline engineering workflows.
     </p>
 
     <!-- METRICS BAR -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-4 max-w-3xl mx-auto">
-      <Metric label="Years Exp" value="2.5+" />
-      <Metric label="Azure Certs" value="4" />
-      <Metric label="Cost Reduced" value="25%" />
-      <Metric label="Failures Cut" value="30%" />
+      <Metric label="Years Experience" value="4+" />
+      <Metric label="Certifications" value="3" />
+      <Metric label="Fault Tolerance" value="+60%" />
+      <Metric label="Pipeline Failures" value="-30%" />
     </div>
 
     <!-- CONTACT LINKS -->
@@ -49,7 +50,7 @@ const { name, title, location, email, linkedin, github, phone } = Astro.props;
       <a href={github} class="flex items-center gap-1.5 hover:text-primary transition-colors" target="_blank" rel="noopener">🐙 GitHub</a>
       {phone && <><span class="hidden md:inline">|</span><span>📞 {phone}</span></>}
       <span class="hidden md:inline">|</span>
-      <a href="/resume.pdf" class="flex items-center gap-1.5 hover:text-accent transition-colors font-semibold" target="_blank" rel="noopener">📄 Resume</a>
+      <a href={sitePath('/resume.pdf')} class="flex items-center gap-1.5 hover:text-accent transition-colors font-semibold" target="_blank" rel="noopener">📄 Resume</a>
     </div>
   </div>
 
@@ -59,10 +60,11 @@ const { name, title, location, email, linkedin, github, phone } = Astro.props;
   </div>
 </header>
 
-<!-- Metric Micro-Component -->
-<Metric interface Props { label: string; value: string; }>
-<div class="bg-dark-card/50 dark:bg-dark-card/50 light:bg-light-card/50 backdrop-blur-sm rounded-xl border border-dark-border/50 dark:border-dark-border/50 light:border-light-border/50 p-4">
-  <p class="text-3xl md:text-4xl font-bold font-mono text-primary dark:text-primary light:text-primary-dark">{value}</p>
-  <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 light:text-slate-500 uppercase tracking-wider">{label}</p>
-</div>
-</Metric>
+<style>
+  .hero-pattern {
+    background-image:
+      linear-gradient(rgba(0, 120, 212, 0.35) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 120, 212, 0.35) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+</style>

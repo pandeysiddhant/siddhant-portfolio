@@ -1,4 +1,6 @@
 ---
+import { sitePath } from '../utils/sitePath';
+
 interface Props {
   title: string;
   description: string;
@@ -6,9 +8,9 @@ interface Props {
   ogImage?: string;
 }
 const { title, description, canonicalURL, ogImage } = Astro.props;
-const site = 'https://spandey1234.github.io'; // UPDATE ME
-const url = canonicalURL ? new URL(canonicalURL, site).href : Astro.url.href;
-const image = ogImage ? new URL(ogImage, site).href : new URL('/assets/og-default.png', site).href; // Create an OG image later
+const site = 'https://pandeysiddhant.github.io';
+const url = new URL(sitePath(canonicalURL ?? Astro.url.pathname), site).href;
+const image = ogImage ? new URL(ogImage.startsWith('http') ? ogImage : sitePath(ogImage), site).href : undefined;
 ---
 <!doctype html>
 <html lang="en" class="dark"> <!-- Default Dark Mode -->
@@ -28,20 +30,72 @@ const image = ogImage ? new URL(ogImage, site).href : new URL('/assets/og-defaul
     <meta property="og:url" content={url} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={image} />
+    {image && <meta property="og:image" content={image} />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={image} />
+    {image && <meta name="twitter:image" content={image} />}
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    
-    <!-- Mermaid CDN Fallback (if not bundled) -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script> -->
+    <link rel="icon" type="image/svg+xml" href={sitePath('/favicon.svg')} />
   </head>
   <body class="font-sans text-slate-200 dark:text-slate-200 light:text-slate-800 bg-dark-bg dark:bg-dark-bg light:bg-light-bg antialiased flex flex-col min-h-screen">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="site-brand" href={sitePath('/')} aria-label="Siddhant Pandey home">SP<span>.</span></a>
+      <div class="site-nav-links">
+        <a href={sitePath('/')}>Home</a>
+        <a href={sitePath('/projects/')}>Projects</a>
+        <a href={sitePath('/certifications/')}>Certifications</a>
+        <a href={sitePath('/contact/')}>Contact</a>
+      </div>
+    </nav>
     <slot />
   </body>
 </html>
+
+<style is:global>
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -5rem;
+    z-index: 50;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    color: #0d1117;
+  }
+  .skip-link:focus { top: 1rem; }
+  .site-nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #30363d;
+  }
+  .site-brand {
+    color: #f0f6fc;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .site-brand span { color: #0078d4; }
+  .site-nav-links { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+  .site-nav-links a {
+    color: #9da7b3;
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+  .site-nav-links a:hover, .site-nav-links a:focus-visible { color: #58a6ff; }
+  @media (max-width: 480px) {
+    .site-nav { align-items: flex-start; padding-inline: 1rem; }
+    .site-nav-links { justify-content: flex-end; gap: 0.5rem 0.75rem; }
+    .site-nav-links a { font-size: 0.75rem; }
+  }
+</style>

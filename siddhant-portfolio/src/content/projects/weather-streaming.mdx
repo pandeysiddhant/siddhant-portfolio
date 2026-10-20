@@ -1,9 +1,6 @@
-
-### `src/content/projects/weather-streaming.mdx`
-```mdx
 ---
 title: "Real-time Weather Data Streaming Pipeline"
-description: "Built an end-to-end streaming solution ingesting OpenWeather API data into Delta Lake using Structured Streaming on Databricks."
+description: "Built an end-to-end streaming solution ingesting weather API data into Delta Lake using Structured Streaming on Databricks."
 publishDate: "2023-06-01"
 tags: ["Structured Streaming", "PySpark", "REST API", "Delta Lake", "Databricks", "Event Hubs", "Autoloader"]
 featured: false
@@ -19,7 +16,7 @@ githubUrl: "https://github.com/spandey1234/weather-streaming-pipeline" # UPDATE 
 architecture: |
   graph TD
     Scheduler[ADF / Jobs Scheduler\nEvery 5 mins] -->|Trigger| Notebook[Databricks Notebook]
-    Notebook -->|Parallel Async Requests| API[OpenWeather API]
+    Notebook -->|Parallel Async Requests| API[Weather API]
     API -->|JSON Response| Notebook
     Notebook -->|ForeachBatch Writer| Bronze[(Bronze Delta Table\nRaw JSON + Metadata)]
     Bronze -->|Structured Streaming\nReadChangeFeed| Silver[(Silver Delta Table\nFlattened + Cleaned)]

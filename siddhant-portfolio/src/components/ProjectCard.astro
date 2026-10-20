@@ -1,4 +1,6 @@
 ---
+import { sitePath } from '../utils/sitePath';
+
 interface Props {
   title: string;
   description: string;
@@ -17,7 +19,7 @@ const { title, description, tags, metrics, featured, slug, githubUrl } = Astro.p
 
   <div class="flex items-start justify-between gap-4 mb-4">
     <h3 class="text-xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 group-hover:text-primary transition-colors flex-1 pr-4">
-      <a href={`/projects/${slug}/`}>{title}</a>
+      <a href={sitePath(`/projects/${slug}/`)}>{title}</a>
     </h3>
     {githubUrl && (
       <a href={githubUrl} target="_blank" rel="noopener" class="text-slate-500 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-primary/10">
@@ -32,7 +34,7 @@ const { title, description, tags, metrics, featured, slug, githubUrl } = Astro.p
   {metrics && metrics.length > 0 && (
     <div class="grid grid-cols-2 gap-3 mb-4 p-3 bg-dark-bg/50 dark:bg-dark-bg/50 light:bg-light-bg/50 rounded-lg border border-dark-border/50">
       {metrics.map((m, i) => (
-        <div key={i} class="text-center">
+        <div class="text-center">
           <p class="text-xs font-mono text-accent dark:text-accent light:text-accent">{m.value || m.after || '✓'}</p>
           <p class="text-[10px] text-slate-500 uppercase tracking-wider">{m.label}</p>
           {m.before && <p class="text-[9px] text-slate-600 line-through">was {m.before}</p>}
@@ -44,7 +46,7 @@ const { title, description, tags, metrics, featured, slug, githubUrl } = Astro.p
   {/* Tags */}
   <div class="flex flex-wrap gap-1.5 mt-auto pt-4 border-t border-dark-border/50">
     {tags.slice(0, 5).map(tag => (
-      <span key={tag} class="px-2 py-0.5 text-xs font-mono rounded bg-dark-bg dark:bg-dark-bg light:bg-light-bg border border-dark-border/50 text-slate-500">{tag}</span>
+      <span class="px-2 py-0.5 text-xs font-mono rounded bg-dark-bg dark:bg-dark-bg light:bg-light-bg border border-dark-border/50 text-slate-500">{tag}</span>
     ))}
     {tags.length > 5 && <span class="px-2 py-0.5 text-xs font-mono rounded bg-primary/10 text-primary border border-primary/20">+{tags.length - 5}</span>}
   </div>

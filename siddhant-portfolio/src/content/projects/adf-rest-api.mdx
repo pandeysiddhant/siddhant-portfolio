@@ -22,7 +22,7 @@ architecture: |
     Jenkins -->|Trigger Job| Notebook[Databricks Notebook Python]
     Notebook -->|MSAL Client Credentials Flow| AAD[Azure AD / Entra ID]
     AAD -->|Bearer Token| Notebook
-    Notebook -->|REST API (PUT/PATCH/POST)| ADF[(Azure Data Factory)]
+    Notebook -->|REST API: PUT, PATCH, POST| ADF[(Azure Data Factory)]
     ADF -->|Deploy/Update| Resources[Pipelines, Triggers, Datasets, Linked Services]
     style Notebook fill:#FF3621,color:#fff,stroke:#333
     style ADF fill:#0078D4,color:#fff,stroke:#333

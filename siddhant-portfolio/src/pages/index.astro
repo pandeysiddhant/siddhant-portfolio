@@ -3,8 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import TechBadges from '../components/TechBadges.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import CertBadge from '../components/CertBadge.astro';
 import Footer from '../components/Footer.astro';
 import { getCollection } from 'astro:content';
+import { sitePath } from '../utils/sitePath';
 
 // Fetch featured projects
 const allProjects = await getCollection('projects');
@@ -12,15 +14,54 @@ const featuredProjects = allProjects
   .filter(p => p.data.featured && !p.data.draft)
   .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
   .slice(0, 3); // Show top 3
+
+const experience = [
+  {
+    role: 'Data Engineer',
+    company: 'HALEON',
+    period: 'September 2025 - Present',
+    location: 'Bengaluru, India',
+    highlights: [
+      'Develop Azure Data Factory pipelines to ingest SAP BW/4HANA data into ADLS Gen2, and build Databricks notebooks for downstream processing.',
+      'Create and manage Databricks Unity Catalog tables, and migrate data from Azure SQL Database into the governed catalog.',
+      'Maintain GitHub Actions CI/CD workflows for automated deployments across the data platform.',
+      'Maintain DPE frameworks for file validation and preprocessing; Source-to-Raw and Raw-to-Sanitize ingestion; SCD processing and reconciliation; and data validation, transformation, and retention.',
+      'Optimize pipeline processing and storage as part of ongoing platform operations.',
+    ],
+  },
+  {
+    role: 'Data Engineer',
+    company: 'Tata Consultancy Services',
+    period: 'June 2022 - September 2025',
+    location: 'Bengaluru, India',
+    highlights: [
+      'Designed and developed Azure Data Factory and Databricks pipelines integrating ADLS Gen2 and Azure Blob Storage for secure, scalable data movement.',
+      'Built PySpark, Python, Scala, and SQL notebooks for data transformation, with retry logic and monitoring that improved fault tolerance by 60% and reduced pipeline failures by 30%.',
+      'Orchestrated ADF workflows with error handling and alerting, and applied Spark optimization techniques to improve processing efficiency and reduce downtime.',
+      'Applied role-based access control (RBAC) to manage secure access to data and platform resources.',
+      'Automated releases through Jenkins CI/CD pipelines integrated with Git; tested pipeline components with Cucumber and used generative AI tools to reduce manual effort and accelerate delivery.',
+    ],
+  },
+  {
+    role: 'Intern',
+    company: 'Tata Consultancy Services',
+    period: 'February 2022 - May 2022',
+    location: 'India',
+    highlights: [
+      'Built CI/CD deployments for a Spring Boot application using Azure DevOps and Jenkins.',
+      'Used Terraform to provision repeatable cloud infrastructure for Azure App Service.',
+    ],
+  },
+];
 ---
 
 <BaseLayout 
-  title="Siddhant Pandey — Azure Data Engineer" 
-  description="Building scalable data platforms on Azure & Databricks. Specializing in Spark optimization, Delta Lake, CI/CD automation, and Data Governance."
+  title="Siddhant Pandey — Data Engineer" 
+  description="Data Engineer with 4+ years building scalable Azure data solutions with Databricks, Azure Data Factory, Apache Spark, Python, Scala, SQL, and CI/CD."
 >
   <Hero 
     name="Siddhant Pandey" 
-    title="Azure Data Engineer" 
+    title="Data Engineer" 
     location="Bengaluru, India" 
     email="pandeysiddhant85@gmail.com" 
     linkedin="https://www.linkedin.com/in/spandey1234" 
@@ -28,7 +69,42 @@ const featuredProjects = allProjects
     phone="+91 8840115912"
   />
 
-  <main class="flex-1 w-full max-w-6xl mx-auto px-6 py-12 md:py-20">
+  <main id="main-content" class="flex-1 w-full max-w-6xl mx-auto px-6 py-12 md:py-20">
+    <section id="experience" class="mb-20">
+      <header class="mb-10">
+        <h2 class="text-3xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-2">Experience</h2>
+        <p class="text-slate-500 dark:text-slate-400 light:text-slate-600">Data engineering across Azure, Databricks, and cloud delivery.</p>
+      </header>
+      <div class="ml-2 border-l border-dark-border pl-6">
+        {experience.map((entry) => (
+          <article class="relative pb-10 last:pb-0">
+            <span class="absolute -left-[1.9rem] top-1.5 h-3 w-3 rounded-full border-2 border-primary bg-dark-bg" aria-hidden="true"></span>
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+              <div>
+                <h3 class="text-xl font-semibold text-slate-100 dark:text-slate-100 light:text-slate-900">{entry.role}</h3>
+                <p class="text-primary">{entry.company} <span class="text-slate-500">· {entry.location}</span></p>
+              </div>
+              <p class="text-sm font-mono text-slate-500">{entry.period}</p>
+            </div>
+            <ul class="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-400">
+              {entry.highlights.map((highlight) => <li>{highlight}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="education" class="mb-20 border-y border-dark-border py-8">
+      <h2 class="text-2xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900">Education</h2>
+      <div class="mt-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+        <div>
+          <h3 class="font-semibold text-slate-200 dark:text-slate-200 light:text-slate-800">Bachelor of Engineering, Electronics &amp; Communication Engineering</h3>
+          <p class="text-sm text-slate-500">PSIT College of Engineering, Kanpur</p>
+        </div>
+        <p class="text-sm font-mono text-slate-500">2018 - 2022</p>
+      </div>
+    </section>
+
     <!-- Featured Projects -->
     <section id="projects" class="mb-20">
       <header class="mb-10">
@@ -49,7 +125,7 @@ const featuredProjects = allProjects
         ))}
       </div>
       <div class="text-center mt-10">
-        <a href="/projects/" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-mono font-medium text-primary border border-primary rounded-lg hover:bg-primary/10 transition-colors">
+        <a href={sitePath('/projects/')} class="inline-flex items-center gap-2 px-6 py-3 text-sm font-mono font-medium text-primary border border-primary rounded-lg hover:bg-primary/10 transition-colors">
           View All Projects →
         </a>
       </div>
@@ -69,30 +145,16 @@ const featuredProjects = allProjects
        <header class="mb-10">
         <h2 class="text-3xl font-bold text-slate-100 dark:text-slate-100 light:text-slate-900 mb-2">Certifications</h2>
       </header>
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <CertBadge name="Databricks Certified Data Engineer Associate" issuer="Databricks" color="#FF3621" />
-        <CertBadge name="Azure Data Engineer Associate (DP-203)" issuer="Microsoft" color="#0078D4" />
         <CertBadge name="Azure Data Fundamentals (DP-900)" issuer="Microsoft" color="#0078D4" />
         <CertBadge name="Azure Fundamentals (AZ-900)" issuer="Microsoft" color="#0078D4" />
       </div>
       <div class="text-center mt-6">
-        <a href="/certifications/" class="text-sm font-mono text-primary hover:underline">View All & Verify Credentials →</a>
+        <a href={sitePath('/certifications/')} class="text-sm font-mono text-primary hover:underline">View All Certifications →</a>
       </div>
     </section>
   </main>
 
   <Footer />
 </BaseLayout>
-
-<!-- Inline Micro Component for Certs -->
-<CertBadge interface Props { name: string; issuer: string; color: string; }>
-<div class="bg-dark-card dark:bg-dark-card light:bg-light-card border border-dark-border dark:border-dark-border light:border-light-border rounded-xl p-5 flex flex-col items-start justify-between h-full transition-colors hover:border-primary/50">
-  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style={`background: ${color}15; border: 1px solid ${color}40;`}>
-    <span class="text-2xl">📜</span>
-  </div>
-  <div>
-    <p class="font-semibold text-slate-100 dark:text-slate-100 light:text-slate-900 text-sm">{name}</p>
-    <p class="text-xs text-slate-500 mt-1">{issuer}</p>
-  </div>
-</div>
-</CertBadge>
